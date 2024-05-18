@@ -24,7 +24,6 @@ st.sidebar.markdown(
         unsafe_allow_html=True,
     )
 
-
 def getData()-> pd.DataFrame:
     headers = {
         "Content-Type": "application/json",
