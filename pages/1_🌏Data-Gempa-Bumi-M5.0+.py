@@ -11,8 +11,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed")
 
+st.set_option("deprecation.showPyplotGlobalUse", False)
 
-url = 'https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json'
+url = 'https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json'
 
 st.sidebar.markdown(
         """
@@ -43,11 +44,6 @@ def getData()-> pd.DataFrame:
         df['DateTime'] = pd.to_datetime(df['DateTime'])
         df['Kedalaman'] = df['Kedalaman'].apply(lambda x: ' '.join(x.split()[:1]))
         df['Kedalaman'] = df['Kedalaman'].astype(float)
-        df['Wilayah_Unique'] = df['Wilayah'].apply(lambda x: 
-            'di darat' if 'di darat' in x.lower() or 'didarat' in x.lower() 
-            else 'di laut' if 'di laut' in x.lower() or 'dilaut' in x.lower() 
-            else None
-            )
         return df
     else:
         return None
@@ -86,40 +82,44 @@ def lineChart(dataframe:pd.DataFrame):
     return fig
 
 def donutChart(dataframe:pd.DataFrame):
-    dataframe['Depth'] = dataframe['Kedalaman'].apply(lambda x: 'D < 10' if x < 10 else '10 ≤ D < 20' if 10 <= x < 20 else 'D ≥ 20')
-    counts = dataframe.groupby('Depth').size().reset_index(name='Count')
-    fig = px.pie(counts, values=counts['Count'], names=counts['Depth'], hole=.4, title="Berdasarkan Kedalaman")
+    dataframe['Potensi Stunami'] = dataframe['Potensi'].apply(lambda x: ' '.join(x.split()[:1]))
+    counts = dataframe.groupby('Potensi Stunami').size().reset_index(name='Count')
+    fig = px.pie(counts, values=counts['Count'], names=counts['Potensi Stunami'], hole=.4, title="Berpotensi Stunami")
     fig.update_layout(title={'x':0.2})
     return fig
 
 
 df = getData()
 
-st.write("""<h3 style="text-align: center; margin-top:0;">Visualisasi Data Gemap Bumi</h3>""", unsafe_allow_html=True)
+st.write("""<h3 style="text-align: center; margin-top:0;">Visualisasi Data Gemap Bumi dengan M 5.0+</h3>""", unsafe_allow_html=True)
 st.markdown("***")
 
 col1, col2 = st.columns([8, 2], gap="medium")
 col3, col4 = st.columns([5, 5], gap="medium")
 
 with col2:
-    unique_wilayah = df['Wilayah_Unique'].unique()
-    selected_wilayah = st.multiselect('Pusat Gempa:', unique_wilayah, default=unique_wilayah)
-    df = df[df['Wilayah_Unique'].isin(selected_wilayah)]
+    min_value_kedalaman = df['Kedalaman'].min() if len(df) > 0 else 0
+    max_value_kedalaman = df['Kedalaman'].max() if len(df) > 0 else 1
+    min_kedalaman, max_kedalaman = st.slider(label = "Kedalaman (km):",
+                                min_value = min_value_kedalaman,
+                                max_value = max_value_kedalaman,
+                                value = (min_value_kedalaman,max_value_kedalaman))
+    df = df[df['Kedalaman'].between(min_kedalaman, max_kedalaman)]
 
-    min_value = df['Magnitude'].min() if len(df) > 0 else 0
-    max_value = df['Magnitude'].max() if len(df) > 0 else 1
-    min, max = st.slider(label = "Magnitude:",
-                                min_value = min_value,
-                                max_value = max_value,
-                                value = (min_value, max_value))
-    df = df[df['Magnitude'].between(min, max)]
+    min_value_magnitude = df['Magnitude'].min() if len(df) > 0 else 0
+    max_value_magnitude = df['Magnitude'].max() if len(df) > 0 else 1
+    min_magnitude, max_magnitude = st.slider(label = "Magnitude:",
+                                min_value = min_value_magnitude,
+                                max_value = max_value_magnitude,
+                                value = (min_value_magnitude,max_value_magnitude))
+    df = df[df['Magnitude'].between(min_magnitude, max_magnitude)]
     
     st.plotly_chart(donutChart(df), use_container_width=True)
 
 
 
 with col1:
-    st.write("""<p style="text-align: center; font-weight: bold;">15 Titik Gempa Bumi Terbaru di Indonesia</p>""", unsafe_allow_html=True)
+    st.write("""<p style="text-align: center; font-weight: bold;">15 Titik Gempa Bumi dengan M 5.0+ di Indonesia</p>""", unsafe_allow_html=True)
     st.pydeck_chart(
         pdk.Deck(
             layers=[getLayer(df,100000,[0, 225,0]), getLayer(df,50000,[225,255,0]), getLayer(df,1,[255,0,0])],
