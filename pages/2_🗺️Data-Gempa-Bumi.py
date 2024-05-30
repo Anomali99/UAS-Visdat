@@ -11,6 +11,8 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed")
 
+st.set_option("deprecation.showPyplotGlobalUse", False)
+
 
 url_terbaru = 'https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json'
 url_M5 = 'https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json'
@@ -45,7 +47,7 @@ def getData(url:str)-> pd.DataFrame:
 st.write("""<h3 style="text-align: center; margin-top:0;">Table Data Gempa Bumi</h3>""", unsafe_allow_html=True)
 st.markdown("***")
 st.write("""<p style="text-align: center; font-weight: bold;">15 Gempa Bumi Terbaru di Indonesia</p>""", unsafe_allow_html=True)
-st.table(getData(url_terbaru))
+st.dataframe(getData(url_terbaru))
 st.markdown("***")
 st.write("""<p style="text-align: center; font-weight: bold;">15 Gempa Bumi dengan M 5.0+ di Indonesia</p>""", unsafe_allow_html=True)
-st.table(getData(url_M5))
+st.dataframe(getData(url_M5))

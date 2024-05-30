@@ -91,7 +91,7 @@ def donutChart(dataframe:pd.DataFrame):
 
 df = getData()
 
-st.write("""<h3 style="text-align: center; margin-top:0;">Visualisasi Data Gemap Bumi dengan M 5.0+</h3>""", unsafe_allow_html=True)
+st.write("""<h3 style="text-align: center; margin-top:0;">Visualisasi Data Gempa Bumi dengan M 5.0+</h3>""", unsafe_allow_html=True)
 st.markdown("***")
 
 col1, col2 = st.columns([8, 2], gap="medium")
