@@ -1,7 +1,6 @@
+from config import markdown
 import streamlit as st
-import plotly.express as px
 import pandas as pd
-import pydeck as pdk
 import requests
 
 
@@ -17,16 +16,7 @@ st.set_option("deprecation.showPyplotGlobalUse", False)
 url_terbaru = 'https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json'
 url_M5 = 'https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json'
 
-st.sidebar.markdown(
-        """
-            > Team
-            1. Nur Fatiq (09040622071)
-            2. Raden Roro Dalilati Nabilah Karamina (09040622074)
-            3. Moch Hilu Maulidy (09020622034)
-        """,
-        unsafe_allow_html=True,
-    )
-
+st.sidebar.markdown(markdown, unsafe_allow_html=True,)
 
 def getData(url:str)-> pd.DataFrame:
     headers = {
