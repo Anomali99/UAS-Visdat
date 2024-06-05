@@ -15,12 +15,42 @@ map_styles = {
     "Dark": "mapbox://styles/mapbox/dark-v10",
 }
 
-markdown =  ("""
+def configuration():
+    st.set_page_config(
+        page_title="Dashboard - Earthquake",
+        page_icon="https://www.bmkg.go.id//asset/img/favicon.ico",
+        layout="wide",
+        initial_sidebar_state="collapsed")
+
+    st.set_option("deprecation.showPyplotGlobalUse", False)
+
+    st.markdown("""
+        <style>
+            [data-testid="stSidebarNav"] {
+                background-image: url(https://www.bmkg.go.id/asset/img/logo/logo-bmkg.png);
+                background-position: center 20px;
+                background-repeat: no-repeat;
+                padding-top: 130px;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+    
+
+def getSidebar(secetbox:bool=True) -> int:
+    selected_style = 0
+    if secetbox:
+        selected_style = st.selectbox("Select Map Style", list(map_styles.keys()), index=7)
+    st.markdown("""
                 > Team
                 1. Nur Fatiq (09040622071)
                 2. Raden Roro Dalilati Nabilah Karamina (09040622074)
                 3. Moch Hilu Maulidy (09020622034)
-            """)
+            """, unsafe_allow_html=True)
+    st.markdown("***")
+    st.markdown("""
+        <P>Tugas Uas Matakuliah Visualisasi Data 2024</P>
+        """, unsafe_allow_html=True)
+    return selected_style
 
 def getData(url:str)-> pd.DataFrame:
     headers = {

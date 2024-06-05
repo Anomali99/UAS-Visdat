@@ -1,26 +1,12 @@
-from config import map_styles, markdown, getData, getMapChart, lineChart, scatterPlot, donutChart
+from config import  getSidebar, getMapChart, donutChart, lineChart, scatterPlot, getData, configuration
 import streamlit as st
-import plotly.express as px
-import pandas as pd
-import pydeck as pdk
 
+configuration()
 
-st.set_page_config(
-    page_title="Dashboard - Earthquake",
-    page_icon="✨",
-    layout="wide",
-    initial_sidebar_state="collapsed")
-
-st.set_option("deprecation.showPyplotGlobalUse", False)
-
-url = 'https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json'
-
-
-df = getData(url)
+df = getData('https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json')
 
 with st.sidebar:
-    selected_style = st.selectbox("Select Map Style", list(map_styles.keys()), index=7)
-    st.markdown(markdown, unsafe_allow_html=True)
+    selected_style = getSidebar()
 
 st.write("""<h3 style="text-align: center; margin-top:0;">Visualisasi Data Gempa Bumi dengan M 5.0+</h3>""", unsafe_allow_html=True)
 st.markdown("***")

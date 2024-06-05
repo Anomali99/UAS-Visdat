@@ -1,22 +1,15 @@
-from config import markdown
+from config import configuration, getSidebar
 import streamlit as st
 import pandas as pd
 import requests
 
-
-st.set_page_config(
-    page_title="Dashboard - Earthquake",
-    page_icon="✨",
-    layout="wide",
-    initial_sidebar_state="collapsed")
-
-st.set_option("deprecation.showPyplotGlobalUse", False)
-
+configuration()
 
 url_terbaru = 'https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json'
 url_M5 = 'https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json'
 
-st.sidebar.markdown(markdown, unsafe_allow_html=True,)
+with st.sidebar:
+    getSidebar(secetbox=False)
 
 def getData(url:str)-> pd.DataFrame:
     headers = {
