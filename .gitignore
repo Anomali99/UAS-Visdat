@@ -1,3 +1,5 @@
 venv
 .env
 __pycache__
+data-gempa-terbaru.json
+data-gempa-M5.0+.json

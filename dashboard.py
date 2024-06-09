@@ -1,5 +1,9 @@
 from config import getSidebar, getMapChart, donutChart, lineChart, scatterPlot, getData, configuration
-import streamlit as st
+from rest_api import run_scheduler
+import streamlit as st, threading
+
+scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
+scheduler_thread.start()
 
 configuration()
 
@@ -7,7 +11,6 @@ df = getData('https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json')
 
 with st.sidebar:
     selected_style =  getSidebar()
-
 
 st.write("""<h3 style="text-align: center; margin-top:0;">Visualisasi Data Gempa Bumi</h3>""", unsafe_allow_html=True)
 st.markdown("***")
