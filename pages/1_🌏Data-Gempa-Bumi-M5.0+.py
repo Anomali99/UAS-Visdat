@@ -1,9 +1,9 @@
-from config import  getSidebar, getMapChart, donutChart, lineChart, scatterPlot, getData, configuration
+from config import  getSidebar, getMapChart, donutChart, scatterPlot, getData, configuration, getBarChart
 import streamlit as st
 
 configuration()
 
-df = getData('https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json')
+df = getData('data-gempa-M5.0+.json')
 
 with st.sidebar:
     selected_style = getSidebar()
@@ -35,8 +35,9 @@ with col2:
     st.plotly_chart(donutChart(df, groupby='Potensi Stunami', title="Berpotensi Stunami"), use_container_width=True)
 
 with col1:
-    st.write("""<p style="text-align: center; font-weight: bold;">15 Titik Gempa Bumi dengan M 5.0+ di Indonesia</p>""", unsafe_allow_html=True)
+    st.write("""<p style="text-align: center; font-weight: bold;">Gempa Bumi dengan M 5.0+ di Indonesia</p>""", unsafe_allow_html=True)
     st.pydeck_chart(getMapChart(df,style=selected_style))
 
 col3.plotly_chart(scatterPlot(df))
-col4.plotly_chart(lineChart(df))
+with col4:
+    getBarChart(df)

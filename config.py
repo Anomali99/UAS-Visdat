@@ -1,8 +1,9 @@
+from datetime import datetime
 import streamlit as st
 import plotly.express as px
 import pandas as pd
 import pydeck as pdk
-import requests
+import json
 
 map_styles = {
     "Streets": "mapbox://styles/mapbox/streets-v11",
@@ -52,25 +53,16 @@ def getSidebar(secetbox:bool=True) -> int:
         """, unsafe_allow_html=True)
     return selected_style
 
-def getData(url:str)-> pd.DataFrame:
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "*/*",
-        "User-Agent":"Anoamali99",
-        }
-    response = requests.get(url, headers=headers)
-
-    if response.status_code == 200:
-        gempa = response.json()['Infogempa']['gempa']
-        df = pd.DataFrame(gempa)
-        df[['latitude', 'longitude']] = df['Coordinates'].str.split(',', expand=True)
-        df['Kedalaman'] = df['Kedalaman'].apply(lambda x: ' '.join(x.split()[:1]))
-        df['DateTime'] = pd.to_datetime(df['DateTime'])
-        for label in ['latitude', 'longitude', 'Magnitude', 'Kedalaman']:
-            df[label] = df[label].astype(float)
-        return df
-    else:
-        return None
+def getData(filename:str)-> pd.DataFrame:
+    with open(filename, 'r') as json_file:
+        data = json.load(json_file)
+    df = pd.DataFrame(data)
+    df[['latitude', 'longitude']] = df['Coordinates'].str.split(',', expand=True)
+    df['Kedalaman'] = df['Kedalaman'].apply(lambda x: ' '.join(x.split()[:1]))
+    df['DateTime'] = pd.to_datetime(df['DateTime'])
+    for label in ['latitude', 'longitude', 'Magnitude', 'Kedalaman']:
+        df[label] = df[label].astype(float)
+    return df
 
 
 def scatterPlot(dataframe:pd.DataFrame):
@@ -90,14 +82,31 @@ def donutChart(dataframe:pd.DataFrame, groupby:str, title:str):
     fig.update_layout(title={'x':0.2})
     return fig
 
-def getLayer(dataframe:pd.DataFrame, radius:int, color=[0, 0, 0]) -> pdk.Layer:
+def assign_color(magnitude):
+    if magnitude < 3.0:
+        return [72, 72, 72]  
+    elif magnitude < 4.0:
+        return [0, 0, 225]  
+    elif magnitude < 5.0:
+        return [0, 255, 255]  
+    elif magnitude < 6.0:
+        return [0, 255, 0]  
+    elif magnitude < 7.0:
+        return [255, 255, 0]  
+    elif magnitude < 8.0:
+        return [255, 165, 0]  
+    else:
+        return [255, 0, 0] 
+
+def getLayer(dataframe:pd.DataFrame, radius:int) -> pdk.Layer:
     dataframe['radius'] = dataframe['Magnitude'] * radius
+    dataframe['color'] = dataframe['Magnitude'].apply(lambda x: assign_color(x))
 
     layer = pdk.Layer(
         "ScatterplotLayer",
         data=dataframe,
-        pickable=False,
-        opacity=0.1,
+        pickable=True,
+        opacity=1.0,
         stroked=True,
         filled=True,
         radius_scale=1,  
@@ -106,8 +115,8 @@ def getLayer(dataframe:pd.DataFrame, radius:int, color=[0, 0, 0]) -> pdk.Layer:
         line_width_min_pixels=1,
         get_position=["longitude", "latitude"],
         get_radius=["radius"],
-        get_fill_color=color,
-        get_line_color=color,
+        get_fill_color="color",
+        get_line_color=[225,225,225],
         tooltip={"text": "{Magnitude} magnitude earthquake at {Wilayah}"},
     )
     return layer
@@ -115,8 +124,27 @@ def getLayer(dataframe:pd.DataFrame, radius:int, color=[0, 0, 0]) -> pdk.Layer:
 def getMapChart(dataframe:pd.DataFrame, style) -> pdk.Deck:
     return (
         pdk.Deck(
-            layers=[getLayer(dataframe,100000,[0, 225,0]), getLayer(dataframe,50000,[225,255,0]), getLayer(dataframe,1,[255,0,0])],
+            layers=[getLayer(dataframe,1)],
             initial_view_state=pdk.ViewState(latitude=-2.5, longitude=118.0, zoom=4),
+            tooltip={"text": "Magnitude: {Magnitude} \nTanggal: {Tanggal} \nJam: {Jam} \n{Wilayah}"},
             map_style=map_styles[style]
         )
     )
+
+month_mapping = {
+    'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
+    'Mei': '05', 'Jun': '06', 'Juli': '07', 'Agu': '08',
+    'Sep': '09', 'Okt': '10', 'Nov': '11', 'Des': '12'
+}
+
+def parse_indonesian_date(date_str):
+    day, month, year = date_str.split()
+    month = month_mapping[month]
+    return datetime.strptime(f'{day} {month} {year}', '%d %m %Y')
+
+def getBarChart(df:pd.DataFrame):
+    counts = df.groupby('Tanggal').size().reset_index(name='Count')
+    counts['Tanggal'] = counts['Tanggal'].apply(parse_indonesian_date)
+    counts['Tanggal'] = counts['Tanggal'].dt.strftime('%y/%m/%d')
+    st.write("""<p style="text-align: center; font-weight: bold;">Banyak Gempa</p>""", unsafe_allow_html=True)
+    st.bar_chart(counts.set_index('Tanggal'))

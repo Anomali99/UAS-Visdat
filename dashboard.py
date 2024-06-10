@@ -1,13 +1,13 @@
-from config import getSidebar, getMapChart, donutChart, lineChart, scatterPlot, getData, configuration
+from config import getSidebar, getMapChart, donutChart, scatterPlot, getData, configuration, getBarChart
 from rest_api import run_scheduler
-import streamlit as st, threading
+import pandas as pd, streamlit as st, threading
 
 scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
 scheduler_thread.start()
 
 configuration()
 
-df = getData('https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json')
+df = getData('data-gempa-terbaru.json')
 
 with st.sidebar:
     selected_style =  getSidebar()
@@ -40,8 +40,10 @@ with col2:
     st.plotly_chart(donutChart(df, groupby='Depth', title="Berdasarkan Kedalaman"), use_container_width=True)
 
 with col1:
-    st.write("""<p style="text-align: center; font-weight: bold;">15 Titik Gempa Bumi Terbaru di Indonesia</p>""", unsafe_allow_html=True)
+    st.write("""<p style="text-align: center; font-weight: bold;">Gempa Bumi Terbaru di Indonesia</p>""", unsafe_allow_html=True)
     st.pydeck_chart(getMapChart(df,style=selected_style))
 
 col3.plotly_chart(scatterPlot(df))
-col4.plotly_chart(lineChart(df))
+
+with col4:
+    getBarChart(df)
