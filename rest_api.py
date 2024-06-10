@@ -1,5 +1,9 @@
 import streamlit as st
 import requests, json, time, schedule
+from dateutil import parser
+
+def _sort_by_datetime(item):
+    return parser.parse(item['DateTime'])
 
 def _check_json(title:str):
     try:
@@ -28,6 +32,8 @@ def _hit_api(url:str, title:str):
         combined_data = list(combined_data.values())
     else:
         combined_data = new_data
+        
+    combined_data = sorted(combined_data, key=_sort_by_datetime, reverse=True)
 
     with open(title, 'w') as json_file:
         json.dump(combined_data, json_file)
