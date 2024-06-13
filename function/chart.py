@@ -3,7 +3,6 @@ import streamlit as st
 import plotly.express as px
 import pandas as pd
 import pydeck as pdk
-import json
 
 map_styles = {
     "Streets": "mapbox://styles/mapbox/streets-v11",
@@ -16,30 +15,9 @@ map_styles = {
     "Dark": "mapbox://styles/mapbox/dark-v10",
 }
 
-def configuration():
-    st.set_page_config(
-        page_title="Dashboard - Earthquake",
-        page_icon="https://www.bmkg.go.id//asset/img/favicon.ico",
-        layout="wide",
-        initial_sidebar_state="collapsed")
-
-    st.set_option("deprecation.showPyplotGlobalUse", False)
-
-    st.markdown("""
-        <style>
-            [data-testid="stSidebarNav"] {
-                background-image: url(https://www.bmkg.go.id/asset/img/logo/logo-bmkg.png);
-                background-position: center 20px;
-                background-repeat: no-repeat;
-                padding-top: 130px;
-            }
-        </style>
-        """, unsafe_allow_html=True)
-    
-
-def getSidebar(secetbox:bool=True) -> int:
+def getSidebar(secretbox:bool=True) -> int:
     selected_style = 0
-    if secetbox:
+    if secretbox:
         selected_style = st.selectbox("Select Map Style", list(map_styles.keys()), index=7)
     st.markdown("""
                 > Team
@@ -52,17 +30,6 @@ def getSidebar(secetbox:bool=True) -> int:
         <P>Tugas Uas Matakuliah Visualisasi Data 2024</P>
         """, unsafe_allow_html=True)
     return selected_style
-
-def getData(filename:str)-> pd.DataFrame:
-    with open(filename, 'r') as json_file:
-        data = json.load(json_file)
-    df = pd.DataFrame(data)
-    df[['latitude', 'longitude']] = df['Coordinates'].str.split(',', expand=True)
-    df['Kedalaman'] = df['Kedalaman'].apply(lambda x: ' '.join(x.split()[:1]))
-    df['DateTime'] = pd.to_datetime(df['DateTime'])
-    for label in ['latitude', 'longitude', 'Magnitude', 'Kedalaman']:
-        df[label] = df[label].astype(float)
-    return df
 
 
 def scatterPlot(dataframe:pd.DataFrame):

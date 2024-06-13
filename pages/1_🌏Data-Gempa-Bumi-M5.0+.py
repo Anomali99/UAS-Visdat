@@ -1,9 +1,11 @@
-from config import  getSidebar, getMapChart, donutChart, scatterPlot, getData, configuration, getBarChart
+from function.config import  getData, configuration
+from function.chart import getSidebar, getMapChart, donutChart, scatterPlot, getBarChart
+from data import gempa_m5
 import streamlit as st
 
 configuration()
 
-df = getData('data-gempa-M5.0+.json')
+df = getData(gempa_m5)
 
 with st.sidebar:
     selected_style = getSidebar()

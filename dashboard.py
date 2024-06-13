@@ -1,13 +1,15 @@
-from config import getSidebar, getMapChart, donutChart, scatterPlot, getData, configuration, getBarChart
-from rest_api import run_scheduler
-import pandas as pd, streamlit as st, threading
+from function.config import getData, configuration
+from data import gempa_dirasakan
+from function.rest_api import run_scheduler
+from function.chart import getSidebar, getMapChart, donutChart, scatterPlot, getBarChart
+import streamlit as st, threading
 
 scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
 scheduler_thread.start()
 
 configuration()
 
-df = getData('data-gempa-terbaru.json')
+df = getData(gempa_dirasakan)
 
 with st.sidebar:
     selected_style =  getSidebar()
